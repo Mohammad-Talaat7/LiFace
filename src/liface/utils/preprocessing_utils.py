@@ -39,7 +39,9 @@ def return_detector(
             logger.warning("haar model cannot be found at given paths.")
             raise FileNotFoundError("haar model not found.")
 
-        logger.info("Initializaing HAAR detector, using path: %s", cascade_model_path)
+        logger.info(
+            "Initializaing HAAR detector, using path: %s", cascade_model_path
+        )
 
         detector = cv2.CascadeClassifier(cascade_model_path)
         eye_cascade = cv2.CascadeClassifier(cascade_model_path)
@@ -74,7 +76,7 @@ def return_detector(
                 "You must provide a valid cnn_model_path for Dlib CNN detector."
             )
 
-        detector = dlib.cnn_face_detection_model_v1(cnn_model_path)  # type: ignore # pylint: disable=no-member
+        detector = dlib.cnn_face_detection_model_v1(str(cnn_model_path))  # type: ignore # pylint: disable=no-member
         logger.info("Returning the detector")
         return detector
 
@@ -105,7 +107,7 @@ def detect_faces_coordinates(detector_type, detector, image):
         return faces
 
     if detector_type == "mtcnn":
-        boxes,_,_ = detector.detect(image)
+        boxes, _, _ = detector.detect(image)
 
         faces = np.array(
             [

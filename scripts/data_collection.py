@@ -70,9 +70,7 @@ if __name__ == "__main__":
 
     # Download datasets from Hugging Face
     celeba_dir = download_huggingface_dataset(
-        "flwrlabs/celeba",
-        RAW_DIR,
-        split="All"
+        "flwrlabs/celeba", RAW_DIR, split="All"
     )
 
     print("Data collection complete!")

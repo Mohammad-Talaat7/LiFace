@@ -6,7 +6,7 @@ import cv2
 import dlib
 import pytest
 
-from facenet_pytorch import MTCNN  # type: ignore
+from liface.utils.mtcnn import MTCNN
 from liface.utils.preprocessing_utils import return_detector
 
 

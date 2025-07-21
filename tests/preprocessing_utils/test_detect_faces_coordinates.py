@@ -7,7 +7,7 @@ import dlib
 import numpy as np
 import pytest
 
-from facenet_pytorch import MTCNN  # type: ignore
+from liface.utils.mtcnn import MTCNN
 from liface.utils.preprocessing_utils import detect_faces_coordinates
 
 
@@ -37,7 +37,7 @@ def haar_detector(utils_path):
 @pytest.fixture(scope="module")
 def mtcnn_detector():
     """Fixture for MTCNN detector."""
-    return MTCNN(keep_all=True, device="cpu")
+    return MTCNN(config={"keep_all": True}, device="cpu")
 
 
 @pytest.fixture(scope="module")

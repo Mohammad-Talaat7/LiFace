@@ -32,7 +32,7 @@ class FacePreprocessor:
         self.device = device
 
         if self.detector_type == "haar":
-            self.detector, self.eye_cascade = return_detector( # type: ignore
+            self.detector, self.eye_cascade = return_detector(  # type: ignore
                 detector_type="haar",
                 cascade_path=cascade_model_path,
                 device=device,
