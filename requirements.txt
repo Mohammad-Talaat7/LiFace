@@ -1,0 +1,9 @@
+numpy
+scikit-learn
+tqdm
+dlib
+torch
+torchvision
+path
+datasets
+opencv-python
