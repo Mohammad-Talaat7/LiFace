@@ -1,13 +1,12 @@
 import os
-from pathlib import Path
 
 import numpy as np
 import torch
 from torch import nn
 
-from .mtcnn_face_detection import detect_face, extract_face
+from liface import configurations as Config  # type: ignore
 
-MODEL_DIR = Path(__file__).resolve().parents[3] / "models"
+from .mtcnn_face_detection import detect_face, extract_face
 
 
 class PNet(nn.Module):
@@ -35,7 +34,7 @@ class PNet(nn.Module):
         self.training = False
 
         if pretrained:
-            state_dict_path = MODEL_DIR / "pnet.pt"
+            state_dict_path = Config.PNET_PATH
             state_dict = torch.load(state_dict_path)
             self.load_state_dict(state_dict)
 
@@ -99,7 +98,7 @@ class RNet(nn.Module):
         self.training = False
 
         if pretrained:
-            state_dict_path = MODEL_DIR / "rnet.pt"
+            state_dict_path = Config.RNET_PATH
             state_dict = torch.load(state_dict_path)
             self.load_state_dict(state_dict)
 
@@ -168,7 +167,7 @@ class ONet(nn.Module):
         self.training = False
 
         if pretrained:
-            state_dict_path = MODEL_DIR / "onet.pt"
+            state_dict_path = Config.ONET_PATH
             state_dict = torch.load(state_dict_path)
             self.load_state_dict(state_dict)
 
@@ -229,8 +228,8 @@ class MTCNN(nn.Module):
 
     def __init__(
         self,
-        image_size=160,
-        margin=0,
+        image_size=Config.OUTPUT_SIZE[0],
+        margin=Config.MTCNN_IMAGE_MARGIN,
         config=None,
         device=None,
     ):
@@ -242,14 +241,20 @@ class MTCNN(nn.Module):
         self.margin = margin
 
         self.config = {
-            "min_face_size": config.get("min_face_size", 20),
-            "thresholds": config.get(
-                "thresholds", {"pnet": 0.6, "rnet": 0.7, "onet": 0.7}
+            "min_face_size": config.get(
+                "min_face_size", Config.MTCNN_MIN_FACE_SIZE
             ),
-            "factor": config.get("factor", 0.709),
-            "post_process": config.get("post_process", True),
-            "keep_all": config.get("keep_all", False),
-            "select_largest": config.get("select_largest", True),
+            "thresholds": config.get("thresholds", Config.MTCNN_THRESHOLDS),
+            "factor": config.get(
+                "factor", Config.MTCNN_PYRAMID_SCALING_FACTOR
+            ),
+            "post_process": config.get(
+                "post_process", Config.MTCNN_POST_PROCESS
+            ),
+            "keep_all": config.get("keep_all", Config.MTCNN_KEEP_ALL),
+            "select_largest": config.get(
+                "select_largest", Config.MTCNN_SELECT_LARGEST
+            ),
         }
         self.config["selection_method"] = config.get(
             "selection_method",
@@ -257,15 +262,26 @@ class MTCNN(nn.Module):
         )
 
         self.nets = {
-            "pnet": PNet(pretrained=config.get("pretrained", True)),
-            "rnet": RNet(pretrained=config.get("pretrained", True)),
-            "onet": ONet(pretrained=config.get("pretrained", True)),
+            "pnet": PNet(
+                pretrained=config.get("pretrained", Config.MTCNN_PRETRAINED)
+            ),
+            "rnet": RNet(
+                pretrained=config.get("pretrained", Config.MTCNN_PRETRAINED)
+            ),
+            "onet": ONet(
+                pretrained=config.get("pretrained", Config.MTCNN_PRETRAINED)
+            ),
         }
 
         self.device = torch.device(device) if device else torch.device("cpu")
         self.to(self.device)
 
-    def forward(self, img, save_path=None, return_prob=False):
+    def forward(
+        self,
+        img,
+        save_path=Config.MTCNN_SAVE_PATH,
+        return_prob=Config.MTCNN_RETURN_PROB,
+    ):
         """Run MTCNN face detection on a PIL image or numpy array. This method performs both
         detection and extraction of faces, returning tensors representing detected faces rather
         than the bounding boxes. To access bounding boxes, see the MTCNN.detect() method below.
@@ -289,11 +305,6 @@ class MTCNN(nn.Module):
                 n x 3 x image_size x image_size tensor with an optional list of detection
                 probabilities. If `img` is a list of images, the item(s) returned have an extra
                 dimension (batch) as the first dimension.
-
-        Example:
-        >>> from facenet_pytorch import MTCNN
-        >>> mtcnn = MTCNN()
-        >>> face_tensor, prob = mtcnn(img, save_path='face.png', return_prob=True)
         """
 
         # Detect faces

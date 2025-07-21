@@ -61,8 +61,7 @@ def preprocess_images(imgs, device):
             np.stack([np.uint8(img) for img in imgs]), device=device
         )
 
-    model_dtype = torch.float32  # assume float32 (will be adjusted later)
-    imgs = imgs.permute(0, 3, 1, 2).type(model_dtype)
+    imgs = imgs.permute(0, 3, 1, 2).type(torch.float32)
     return imgs
 
 

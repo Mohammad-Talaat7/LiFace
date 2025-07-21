@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import cv2
 import dlib
@@ -10,7 +9,6 @@ from .mtcnn import MTCNN
 
 logger = setup_logger("preprocessing_utils", "preprocessing_utils.log")
 logger.info("Initialized preprocessor log file successfully!")
-MODEL_DIR = Path(__file__).resolve().parents[3] / "models"
 
 
 def return_detector(
@@ -24,9 +22,7 @@ def return_detector(
 
     if detector_type == "haar":
 
-        if cascade_path is not None:
-            cascade_model_path = MODEL_DIR / cascade_path
-        else:
+        if cascade_path is None:
             logger.warning(
                 "Failed to initialize the detector HAAR with no path to the cascade model."
             )
@@ -35,22 +31,22 @@ def return_detector(
             )
 
         # Check if the file exists
-        if not os.path.exists(cascade_model_path):
+        if not os.path.exists(cascade_path):
             logger.warning("haar model cannot be found at given paths.")
             raise FileNotFoundError("haar model not found.")
 
         logger.info(
-            "Initializaing HAAR detector, using path: %s", cascade_model_path
+            "Initializaing HAAR detector, using path: %s", cascade_path
         )
 
-        detector = cv2.CascadeClassifier(cascade_model_path)
-        eye_cascade = cv2.CascadeClassifier(cascade_model_path)
+        detector = cv2.CascadeClassifier(cascade_path)
+        eye_cascade = cv2.CascadeClassifier(cascade_path)
         logger.info("Returning the detector and the eye cascade")
         return detector, eye_cascade
 
     if detector_type == "mtcnn":
         logger.info("Initializaing MTCNN detector")
-        detector = MTCNN(config={"keep_all": True}, device=device)
+        detector = MTCNN(device=device)
         logger.info("Returning the detector")
         return detector
 
@@ -63,14 +59,13 @@ def return_detector(
     if detector_type == "dlib-cnn":
         logger.info("Initializaing dlib-cnn detector")
 
-        if cnn_model_path is not None:
-            cnn_model_path = MODEL_DIR / cnn_model_path
-            if not os.path.isfile(cnn_model_path):
-                logger.error("Didn't receive a valid cnn_model_path")
-                raise ValueError(
-                    "You must provide a valid cnn_model_path for Dlib CNN detector."
-                )
-        else:
+        if cnn_model_path is None:
+            logger.error("Didn't receive a valid cnn_model_path")
+            raise ValueError(
+                "You must provide a valid cnn_model_path for Dlib CNN detector."
+            )
+
+        if not os.path.isfile(cnn_model_path):
             logger.error("Didn't receive a valid cnn_model_path")
             raise ValueError(
                 "You must provide a valid cnn_model_path for Dlib CNN detector."

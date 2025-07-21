@@ -3,6 +3,8 @@ import os
 import cv2
 from tqdm import tqdm
 
+from liface import configurations as Config  # type: ignore
+
 from .utils.logger import setup_logger
 from .utils.preprocessing_utils import (
     align_haar_face,
@@ -18,10 +20,10 @@ class FacePreprocessor:
 
     def __init__(
         self,
-        detector_type="haar",
-        device="cpu",
-        cnn_model_path=None,
-        cascade_model_path=None,
+        detector_type=Config.DETECTOR_TYPE,
+        device=Config.DEVICE,
+        cnn_model_path=Config.DLIB_CNN_PATH,
+        cascade_model_path=Config.HAAR_CASCADE_PATH,
     ):
         logger.info(
             "Initializing FacePreprocessor Class with detector type: %s",
@@ -76,7 +78,9 @@ class FacePreprocessor:
         )
         return face
 
-    def process_directory(self, input_dir, output_dir, target_size=(112, 112)):
+    def process_directory(
+        self, input_dir, output_dir, target_size=Config.OUTPUT_SIZE
+    ):
         """Process an input directory and store the outputs in an output directory."""
         os.makedirs(output_dir, exist_ok=True)
         logger.info(
@@ -122,11 +126,3 @@ class FacePreprocessor:
                 output_path = os.path.join(output_subdir, file)
                 logger.info("Writing resized image to %s", output_path)
                 cv2.imwrite(output_path, resized)
-
-
-if __name__ == "__main__":
-    processor = FacePreprocessor(detector_type="mtcnn")
-    processor.process_directory(
-        input_dir="/home/mohammad/Projects/LiFace/data/test",
-        output_dir="/home/mohammad/Projects/LiFace/data/mtcnn",
-    )

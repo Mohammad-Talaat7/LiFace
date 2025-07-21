@@ -4,6 +4,8 @@ import torch
 from PIL import Image
 from torch.nn.functional import interpolate
 
+from liface import configurations as Config  # type: ignore
+
 
 def empty_results(batch_size):
     """
@@ -38,7 +40,7 @@ def _empty_results(batch_size):
     ), np.array([np.empty((0, 5, 2)) for _ in range(batch_size)], dtype=object)
 
 
-def fixed_batch_process(im_data, model, batch_size=512):
+def fixed_batch_process(im_data, model, batch_size=Config.MTCNN_BATCH_SIZE):
     """
         Process input data in fixed-size batches using a model.
 
